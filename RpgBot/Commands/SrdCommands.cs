@@ -4,31 +4,30 @@ using RpgBot.Data;
 using RpgBot.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace RpgBot.Commands
 {
     internal class SrdCommands : BaseCommandModule
     {
-        [Command("spell"), Description("Returns AD&D spells that begin with {spellName}")]
+        readonly Random rnd = new Random();
+
+        [Command("spell"), Aliases("sp"), Description("Returns AD&D spells that begin with {spellName}")]
         public async Task Spell(CommandContext ctx, string spellName)
         {
             string spell = DataService.SpellsAdd.Where(x => x.StartsWith($"{spellName}")).FirstOrDefault();
             await ctx.RespondAsync(spell);
         }
 
-        [Command("spellosric"), Description("Returns OSRIC spells that begin with {spellName}")]
+        [Command("spellosric"), Aliases("spo"), Description("Returns OSRIC spells that begin with {spellName}")]
         public async Task SpellOsric(CommandContext ctx, string spellName)
         {
             string spell = DataService.SpellsOsric.Where(x => x.Contains($"==== {spellName}")).FirstOrDefault();
             await ctx.RespondAsync(spell);
         }
 
-        [Command("gemstones"), Description("Calculates the values of gemstones for the desired {numberOfGemstones} - 25 max")]
+        [Command("gemstones"), Aliases("gs"), Description("Calculates the values of gemstones for the desired {numberOfGemstones} - 25 max")]
         public async Task Gemstones(CommandContext ctx, int numberOfGemstones)
         {
             if (numberOfGemstones > 25)
@@ -41,8 +40,6 @@ namespace RpgBot.Commands
 
             for (int i = 0; i < numberOfGemstones; i++)
             {
-                Random rnd = new Random();
-
                 int percentileResult = rnd.Next(1, 101);
 
                 GemValue gemValue = DataService.GemValues.Where(x => x.DiceScore >= percentileResult).First();
@@ -54,8 +51,6 @@ namespace RpgBot.Commands
 
             foreach (var item in generatedGemValues)
             {
-                Random rnd = new Random();
-
                 double gemBaseValue = item.BaseValue;
 
                 var gemPropertiesPossible = DataService.GemProperties.Where(x => x.BaseValue == gemBaseValue).ToList();
@@ -107,8 +102,6 @@ namespace RpgBot.Commands
                             gemBaseValue = gemValue.BaseValue;
                         }
 
-                        rnd = new Random();
-
                         increaseDecreaseDieResult = rnd.Next(1, 11);
 
                         if (increaseDecreaseDieResult == 2)
@@ -156,8 +149,6 @@ namespace RpgBot.Commands
 
                             gemBaseValue = gemValue.BaseValue;
                         }
-
-                        rnd = new Random();
 
                         increaseDecreaseDieResult = rnd.Next(1, 11);
 

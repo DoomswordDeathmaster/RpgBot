@@ -11,7 +11,9 @@ namespace RpgBot.Commands
 {
     internal class DiceCommands : BaseCommandModule
     {
-        [Command("roll"), Description("Rolls some dice based on {diceCommand} (4d6|4d6+3|4d6K3) - max 100 dice")]
+        readonly Random rnd = new Random();
+
+        [Command("roll"), Aliases("r"), Description("Rolls some dice based on {diceCommand} (4d6|4d6+3|4d6K3) - max 100 dice")]
         public async Task Roll(CommandContext ctx, string diceCommand)
         {
             var emoji = DiscordEmoji.FromName(ctx.Client, ":game_die:");
@@ -50,8 +52,6 @@ namespace RpgBot.Commands
                 int diceValuesTotal = 0;
 
                 List<int> diceValues = new List<int>();
-
-                Random rnd = new Random();
 
                 for (int i = 0; i < diceNumber; i++)
                 {
@@ -102,8 +102,6 @@ namespace RpgBot.Commands
 
                 List<int> diceValues = new List<int>();
 
-                Random rnd = new Random();
-
                 for (int i = 0; i < diceNumber; i++)
                 {
                     diceValues.Add(rnd.Next(1, diceType + 1));
@@ -142,8 +140,6 @@ namespace RpgBot.Commands
 
                 List<int> diceValues = new List<int>();
 
-                Random rnd = new Random();
-
                 for (int i = 0; i < diceNumber; i++)
                 {
                     diceValues.Add(rnd.Next(1, diceType + 1));
@@ -163,7 +159,7 @@ namespace RpgBot.Commands
             }
         }
 
-        [Command("char"), Description("Generates a set of ability scores for an AD&D character via {abilityScoreMethod} (I|II)")]
+        [Command("char"), Aliases("ch"), Description("Generates a set of ability scores for an AD&D character via {abilityScoreMethod} (I|II)")]
         public async Task Char(CommandContext ctx, string abilityScoreMethod)
         {
             string diceCommand = string.Empty;
@@ -187,8 +183,6 @@ namespace RpgBot.Commands
                 int diceValuesTotal = 0;
 
                 List<int> diceValues = new List<int>();
-
-                Random rnd = new Random();
 
                 for (int i = 0; i < 6; i++)
                 {
@@ -223,8 +217,6 @@ namespace RpgBot.Commands
                 int diceValuesTotal = 0;
 
                 List<int> diceValues = new List<int>();
-
-                Random rnd = new Random();
 
                 for (int i = 0; i < 12; i++)
                 {
@@ -262,20 +254,18 @@ namespace RpgBot.Commands
             }
             else if (abilityScoreMethod == "II")
             {
-                abilityScoreMethodText = "rolling 3D6 twelve times and keeping the highest 6 results";
+                abilityScoreMethodText = "rolling 3D6 twelve times and keeping the highest 6";
             }
 
             // strip last comma to make it more pretty
             abilityScoresResult = abilityScoresResult.Remove(abilityScoresResult.Length - 1, 1);
-            await ctx.RespondAsync($"A character has been generated for {ctx.Member.Username} by {abilityScoreMethodText}, with the following ability scores: {abilityScoresResult}");
+            await ctx.RespondAsync($"A character has been generated for {ctx.Member.Username} by {abilityScoreMethodText}, resulting in the following ability scores: {abilityScoresResult}");
             //await ctx.RespondAsync($"abilityScoresResult: {abilityScoresResult}");
         }
 
-        [Command("splash"), Description("Calculates the direction, distance and splash damage from misses with a grenade-like missile, by {missileType} (acid|oil|water)")]
+        [Command("splash"), Aliases("spl"), Description("Calculates the direction, distance and splash damage from misses with a grenade-like missile, by {missileType} (acid|oil|water)")]
         public async Task Splash(CommandContext ctx, string missileType)
         {
-            Random rnd = new Random();
-
             int distanceFeet = rnd.Next(1, 7);
 
             Dictionary<int, string> directions = new Dictionary<int, string>
