@@ -17,7 +17,7 @@ namespace RpgBot
 {
     public class Program
     {
-        public readonly EventId BotEventId = new EventId(42, "Bot-Ex03");
+        public readonly EventId BotEventId = new EventId(42, "RpgBot");
 
         public DiscordClient Client { get; set; }
         public InteractivityExtension Interactivity { get; set; }

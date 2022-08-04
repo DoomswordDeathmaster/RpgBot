@@ -21,7 +21,7 @@ namespace RpgBot.Data
 
             // load osric spells
             spellText = "";
-            using (var fs = File.OpenRead("osric-spells.txt"))
+            using (var fs = File.OpenRead("Data\\osric-spells.txt"))
             using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
                 spellText = sr.ReadToEnd();
             var osricResult = Regex.Split(spellText, @"(?=====.*?====)");
@@ -33,7 +33,7 @@ namespace RpgBot.Data
 
             // load ad&d spells
             spellText = "";
-            using (var fs = File.OpenRead("add-spells.txt"))
+            using (var fs = File.OpenRead("Data\\add-spells.txt"))
             using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
                 spellText = sr.ReadToEnd();
             var addResult = Regex.Split(spellText, "====.*\n");
