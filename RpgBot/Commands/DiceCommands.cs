@@ -1,28 +1,52 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using RpgBot.Data;
+using RpgBot.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace RpgBot.Commands
 {
     internal class DiceCommands : BaseCommandModule
     {
-        readonly Random rnd = new Random();
+        //readonly Random rnd = new Random();
 
         [Command("roll"), Aliases("r"), Description("Rolls some dice based on {diceCommand} (4d6|4d6+3|4d6K3) - max 100 dice")]
         public async Task Roll(CommandContext ctx, string diceCommand)
         {
-            var emoji = DiscordEmoji.FromName(ctx.Client, ":game_die:");
+            List<Emoji> Emojis = DataService.Emojis;
 
-            int diceNumber;
+            //{
+            //    new Emoji(1031015488425304064, "d4", $"https://cdn.discordapp.com/emojis/{1031015488425304064}.png"),
+            //    new Emoji(1031017374935175178, "d6", $"https://cdn.discordapp.com/emojis/{1031017374935175178}.png"),
+            //    new Emoji(1031017375912443975, "d8", $"https://cdn.discordapp.com/emojis/{1031017375912443975}.png"),
+            //    new Emoji(1031017376885526578, "d10", $"https://cdn.discordapp.com/emojis/{1031017376885526578}.png"),
+            //    new Emoji(1031017377699221504, "d12", $"https://cdn.discordapp.com/emojis/{1031017377699221504}.png"),
+            //    new Emoji(1031017378710044712, "d20", $"https://cdn.discordapp.com/emojis/{1031017378710044712}.png"),
+            //    new Emoji(1031017376885526578, "d100", $"https://cdn.discordapp.com/emojis/{1031017376885526578}.png")
+            //};
+
+
+            //var dFourEmoji = "https://cdn.discordapp.com/emojis/1031015488425304064.png";
+            //var dSixEmoji = "https://cdn.discordapp.com/emojis/1031017374935175178.png";
+            //var dEightEmoji = "https://cdn.discordapp.com/emojis/1031017375912443975.png";
+            //var dTenEmoji = "https://cdn.discordapp.com/emojis/1031017376885526578.png";
+            //var dTwelveEmoji = "https://cdn.discordapp.com/emojis/1031017377699221504.png";
+            //var dTwentyEmoji = "https://cdn.discordapp.com/emojis/1031017378710044712.png";
+
+            int diceQuantity;
             int diceType;
-            string diceOperator = "";
+            string diceOperator = string.Empty;
             int diceModifier;
+            string diceRolled = string.Empty;
             string diceToKeep = "All";
+            Emoji diceTypeEmoji;
+            string diceTypeEmojiCode = string.Empty;
 
             char[] mathOperators = { '+', '-', '*' };
 
@@ -38,29 +62,35 @@ namespace RpgBot.Commands
 
                 string[] dice = diceCommand.Split(mathOperators);
 
-                diceNumber = int.Parse(dice[0].ToUpper().Split("D")[0]);
+                diceQuantity = int.Parse(dice[0].ToUpper().Split("D")[0]);
 
-                if (diceNumber > 100)
+                if (diceQuantity > 100)
                 {
                     await ctx.RespondAsync($"{ctx.Member.Username}, please roll no more than 100 dice at a time");
                     return;
                 }
 
-                diceType = int.Parse(dice[0].ToUpper().Split("D")[1]);
+                diceType = int.Parse(dice[0].ToUpper().Split("D")[1]); // e.g. 6
                 diceModifier = int.Parse(dice[1]);
+                diceRolled = dice[0]; // e.g. 4d6
+                diceTypeEmoji = Emojis.Where(x => x.Name == $"d{diceType}").FirstOrDefault();
+                diceTypeEmojiCode = $"<:{diceTypeEmoji.Name}:{diceTypeEmoji.Id}>";
+
+                //string diceRolled = $"{diceQuantity} d {diceType}";
+
                 string diceValuesResult = string.Empty;
                 int diceValuesTotal = 0;
 
                 List<int> diceValues = new List<int>();
 
-                for (int i = 0; i < diceNumber; i++)
+                for (int i = 0; i < diceQuantity; i++)
                 {
-                    diceValues.Add(rnd.Next(1, diceType + 1));
+                    diceValues.Add(RandomNumberGenerator.GetInt32(1, diceType + 1));
                 }
 
                 foreach (int item in diceValues)
                 {
-                    diceValuesResult += $"{item},";
+                    diceValuesResult += $"**{item}** ";
                     diceValuesTotal += item;
                 }
 
@@ -80,81 +110,101 @@ namespace RpgBot.Commands
                 // strip last comma to make it more pretty
                 diceValuesResult = diceValuesResult.Remove(diceValuesResult.Length - 1, 1);
 
-                await ctx.RespondAsync($"{emoji} {ctx.Member.Username} rolls... {diceValuesTotal}! ...with these dice: [{diceValuesResult}] modified {diceOperator}{diceModifier} {emoji}");
+                await ctx.RespondAsync($"{diceTypeEmojiCode} **{ctx.Member.Username}** rolls **{diceValuesTotal}** {diceTypeEmojiCode}\r *{diceRolled}* [{diceValuesResult}] *modified by {diceOperator}{diceModifier}*");
                 //await ctx.RespondAsync($"diceNumber: {diceNumber} diceType: {diceType} diceOperator: {diceOperator} diceModifier: {diceModifier} diceValuesResult: {diceValuesResult} diceValuesTotal: {diceValuesTotal}");
             }
             else if (diceCommand.ToUpper().Contains("K"))
             {
                 string[] dice = diceCommand.ToUpper().Split("D");
 
-                diceNumber = int.Parse(dice[0]);
+                diceQuantity = int.Parse(dice[0]); // e.g. 4
 
-                if (diceNumber > 100)
+                if (diceQuantity > 100)
                 {
                     await ctx.RespondAsync($"{ctx.Member.Username}, please roll no more than 100 dice at a time");
                     return;
                 }
 
-                diceToKeep = dice[1].ToUpper().Split("K")[1];
-                diceType = int.Parse(dice[1].ToUpper().Split("K")[0]);
+                diceType = int.Parse(dice[1].ToUpper().Split("K")[0]); // e.g. 6
+                diceRolled = $"{dice[0]}d{diceType}"; // e.g. 4d6
+                diceToKeep = dice[1].ToUpper().Split("K")[1]; // e.g. 3
+                diceTypeEmoji = Emojis.Where(x => x.Name == $"d{diceType}").FirstOrDefault();
+                diceTypeEmojiCode = $"<:{diceTypeEmoji.Name}:{diceTypeEmoji.Id}>";
+
                 string diceValuesResult = string.Empty;
                 int diceValuesTotal = 0;
 
                 List<int> diceValues = new List<int>();
 
-                for (int i = 0; i < diceNumber; i++)
+                for (int i = 0; i < diceQuantity; i++)
                 {
-                    diceValues.Add(rnd.Next(1, diceType + 1));
+                    diceValues.Add(RandomNumberGenerator.GetInt32(1, diceType + 1));
                 }
 
                 diceValues = diceValues.OrderBy(x => x).ToList();
-                diceValues.RemoveRange(0, diceNumber - int.Parse(diceToKeep));
+
+                List<int> diceValuesBeforeDrop = new List<int>(diceValues);
+                string diceValuesBeforeDropResult = string.Empty;
+
+                foreach (int item in diceValuesBeforeDrop)
+                {
+                    diceValuesBeforeDropResult += $"**{item}** ";
+                    //diceValuesTotal += item;
+                }
+
+                diceValues.RemoveRange(0, diceQuantity - int.Parse(diceToKeep));
 
                 foreach (int item in diceValues)
                 {
-                    diceValuesResult += $"{item},";
+                    diceValuesResult += $"**{item}** ";
                     diceValuesTotal += item;
                 }
 
                 // strip last comma to make it more pretty
                 diceValuesResult = diceValuesResult.Remove(diceValuesResult.Length - 1, 1);
 
-                await ctx.RespondAsync($"{emoji} {ctx.Member.Username} rolls... {diceValuesTotal}! ...with these dice: [{diceValuesResult}] {emoji}");
+                await ctx.RespondAsync($"{diceTypeEmojiCode} **{ctx.Member.Username}** rolls **{diceValuesTotal}** {diceTypeEmojiCode}\r *{diceRolled}* [{diceValuesBeforeDropResult}] *keep highest {diceToKeep}* [{diceValuesResult}]");
                 //await ctx.RespondAsync($"diceNumber: {diceNumber} diceType: {diceType} diceToKeep: {diceToKeep} diceValuesResult: {diceValuesResult} diceValuesTotal: {diceValuesTotal}");
             }
             else
             {
                 string[] dice = diceCommand.ToUpper().Split("D");
 
-                diceNumber = int.Parse(dice[0]);
+                diceQuantity = int.Parse(dice[0]);
 
-                if (diceNumber > 100)
+                if (diceQuantity > 100)
                 {
                     await ctx.RespondAsync($"{ctx.Member.Username}, please roll no more than 100 dice at a time");
                     return;
                 }
 
-                diceType = int.Parse(dice[1]);
+                diceType = int.Parse(dice[1]); // e.g. 6
+                //diceRolled = dice[0]; // e.g. 4d6
+                diceRolled = $"{dice[0]}d{diceType}"; // e.g. 4d6
+                diceTypeEmoji = Emojis.Where(x => x.Name == $"d{diceType}").FirstOrDefault();
+                diceTypeEmojiCode = $"<:{diceTypeEmoji.Name}:{diceTypeEmoji.Id}>";
+
                 string diceValuesResult = string.Empty;
                 int diceValuesTotal = 0;
 
                 List<int> diceValues = new List<int>();
 
-                for (int i = 0; i < diceNumber; i++)
+                for (int i = 0; i < diceQuantity; i++)
                 {
-                    diceValues.Add(rnd.Next(1, diceType + 1));
+                    diceValues.Add(RandomNumberGenerator.GetInt32(1, diceType + 1));
                 }
 
                 foreach (int item in diceValues)
                 {
-                    diceValuesResult += $"{item},";
+                    diceValuesResult += $"**{item}** ";
                     diceValuesTotal += item;
                 }
 
                 // strip last comma to make it more pretty
                 diceValuesResult = diceValuesResult.Remove(diceValuesResult.Length - 1, 1);
 
-                await ctx.RespondAsync($"{emoji} {ctx.Member.Username} rolls... {diceValuesTotal}! ...with these dice: [{diceValuesResult}] {emoji}");
+                //await ctx.RespondAsync($"{diceTypeEmojiCode} {ctx.Member.Username} rolls... {diceValuesTotal}! ...with these dice: [{diceValuesResult}] {diceTypeEmojiCode}");
+                await ctx.RespondAsync($"{diceTypeEmojiCode} **{ctx.Member.Username}** rolls **{diceValuesTotal}** {diceTypeEmojiCode}\r *{diceRolled}* [{diceValuesResult}]");
                 //await ctx.RespondAsync($"diceNumber: {diceNumber} diceType: {diceType} diceValuesResult: {diceValuesResult} diceValuesTotal: {diceValuesTotal}");
             }
         }
@@ -189,7 +239,7 @@ namespace RpgBot.Commands
                     // roll the dice sets
                     for (int j = 0; j < diceNumber; j++)
                     {
-                        diceValues.Add(rnd.Next(1, diceType + 1));
+                        diceValues.Add(RandomNumberGenerator.GetInt32(1, diceType + 1));
                     }
 
                     diceValues = diceValues.OrderBy(x => x).ToList();
@@ -223,7 +273,7 @@ namespace RpgBot.Commands
                     // roll the dice sets
                     for (int j = 0; j < diceNumber; j++)
                     {
-                        diceValues.Add(rnd.Next(1, diceType + 1));
+                        diceValues.Add(RandomNumberGenerator.GetInt32(1, diceType + 1));
                     }
 
                     foreach (int item in diceValues)
@@ -266,7 +316,7 @@ namespace RpgBot.Commands
         [Command("splash"), Aliases("spl"), Description("Calculates the direction, distance and splash damage from misses with a grenade-like missile, by {missileType} (acid|oil|water)")]
         public async Task Splash(CommandContext ctx, string missileType)
         {
-            int distanceFeet = rnd.Next(1, 7);
+            int distanceFeet = RandomNumberGenerator.GetInt32(1, 7);
 
             Dictionary<int, string> directions = new Dictionary<int, string>
             {
@@ -280,7 +330,7 @@ namespace RpgBot.Commands
                 { 8, "long (over)" }
             };
 
-            int directionResult = rnd.Next(1, 9);
+            int directionResult = RandomNumberGenerator.GetInt32(1, 9);
 
             string direction = directions.ElementAt(directionResult).Value;
 
@@ -292,7 +342,7 @@ namespace RpgBot.Commands
             }
             else if (missileType == "oil")
             {
-                splashDamage = rnd.Next(1, 4);
+                splashDamage = RandomNumberGenerator.GetInt32(1, 4);
             }
 
             await ctx.RespondAsync($"The thrown {missileType} landed {distanceFeet} feet {direction} and did {splashDamage} damage.");

@@ -14,6 +14,7 @@ namespace RpgBot.Data
         public static List<double> GemValuesExceptional { get; set; } = new List<double>();
         public static List<double> GemValuesPoor { get; set; } = new List<double>();
         public static List<GemProperty> GemProperties { get; set; } = new List<GemProperty>();
+        public static List<Emoji> Emojis { get; set; }
 
         public void LoadSpellText()
         {
@@ -21,7 +22,7 @@ namespace RpgBot.Data
 
             // load osric spells
             spellText = "";
-            using (var fs = File.OpenRead("Data\\osric-spells.txt"))
+            using (var fs = File.OpenRead("./Data/osric-spells.txt"))
             using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
                 spellText = sr.ReadToEnd();
             var osricResult = Regex.Split(spellText, @"(?=====.*?====)");
@@ -33,7 +34,7 @@ namespace RpgBot.Data
 
             // load ad&d spells
             spellText = "";
-            using (var fs = File.OpenRead("Data\\add-spells.txt"))
+            using (var fs = File.OpenRead("./Data/add-spells.txt"))
             using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
                 spellText = sr.ReadToEnd();
             var addResult = Regex.Split(spellText, "====.*\n");
@@ -125,6 +126,20 @@ namespace RpgBot.Data
             GemProperties.Add(new GemProperty() { Type = "Gem Stone (Jewel)", BaseValue = 5000, NameDescription = "Jacinth: fiery orange (Corundum)" });
             GemProperties.Add(new GemProperty() { Type = "Gem Stone (Jewel)", BaseValue = 5000, NameDescription = "Oriental Emerald: clear bright green (Corundum)" });
             GemProperties.Add(new GemProperty() { Type = "Gem Stone (Jewel)", BaseValue = 5000, NameDescription = "Ruby: clear red to deep crimson (Corundum)" });
+        }
+
+        internal void LoadEmojis()
+        {
+            Emojis = new List<Emoji>()
+            {
+                new Emoji(1031015488425304064, "d4", $"https://cdn.discordapp.com/emojis/{1031015488425304064}.png"),
+                new Emoji(1031017374935175178, "d6", $"https://cdn.discordapp.com/emojis/{1031017374935175178}.png"),
+                new Emoji(1031017375912443975, "d8", $"https://cdn.discordapp.com/emojis/{1031017375912443975}.png"),
+                new Emoji(1031017376885526578, "d10", $"https://cdn.discordapp.com/emojis/{1031017376885526578}.png"),
+                new Emoji(1031017377699221504, "d12", $"https://cdn.discordapp.com/emojis/{1031017377699221504}.png"),
+                new Emoji(1031017378710044712, "d20", $"https://cdn.discordapp.com/emojis/{1031017378710044712}.png"),
+                new Emoji(1031017376885526578, "d100", $"https://cdn.discordapp.com/emojis/{1031017376885526578}.png")
+            };
         }
     }
 }

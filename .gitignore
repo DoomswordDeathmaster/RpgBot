@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/old-keys
+/discord-bot-token.txt
+/oracle-rpgbot-key.ppk
+/ssh-key-2022-10-13.key

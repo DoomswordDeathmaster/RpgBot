@@ -2,16 +2,16 @@
 using DSharpPlus.CommandsNext.Attributes;
 using RpgBot.Data;
 using RpgBot.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace RpgBot.Commands
 {
     internal class SrdCommands : BaseCommandModule
     {
-        readonly Random rnd = new Random();
+        //readonly Random rnd = new Random();
 
         [Command("spell"), Aliases("sp"), Description("Returns AD&D spells that begin with {spellName}")]
         public async Task Spell(CommandContext ctx, string spellName)
@@ -40,7 +40,7 @@ namespace RpgBot.Commands
 
             for (int i = 0; i < numberOfGemstones; i++)
             {
-                int percentileResult = rnd.Next(1, 101);
+                int percentileResult = RandomNumberGenerator.GetInt32(1, 101);
 
                 GemValue gemValue = DataService.GemValues.Where(x => x.DiceScore >= percentileResult).First();
 
@@ -54,11 +54,11 @@ namespace RpgBot.Commands
                 double gemBaseValue = item.BaseValue;
 
                 var gemPropertiesPossible = DataService.GemProperties.Where(x => x.BaseValue == gemBaseValue).ToList();
-                int gemPropertiesIndex = rnd.Next(gemPropertiesPossible.Count());
+                int gemPropertiesIndex = RandomNumberGenerator.GetInt32(gemPropertiesPossible.Count());
 
                 var gemProperty = gemPropertiesPossible[gemPropertiesIndex];
 
-                int increaseDecreaseDieResult = rnd.Next(1, 11);
+                int increaseDecreaseDieResult = RandomNumberGenerator.GetInt32(1, 11);
 
                 if (increaseDecreaseDieResult == 2)
                 {
@@ -66,7 +66,7 @@ namespace RpgBot.Commands
                 }
                 else if (increaseDecreaseDieResult == 3)
                 {
-                    int increaseD6Result = rnd.Next(1, 7);
+                    int increaseD6Result = RandomNumberGenerator.GetInt32(1, 7);
                     double increasePercentage = (double)(increaseD6Result * 10) / 100;
 
                     double gemIncreaseValue = gemBaseValue * increasePercentage;
@@ -74,7 +74,7 @@ namespace RpgBot.Commands
                 }
                 else if (increaseDecreaseDieResult == 9)
                 {
-                    int decreaseD4Result = rnd.Next(1, 5);
+                    int decreaseD4Result = RandomNumberGenerator.GetInt32(1, 5);
                     double decreasePercentage = (double)(decreaseD4Result * 10) / 100;
 
                     double gemDecreaseValue = gemBaseValue * decreasePercentage;
@@ -102,7 +102,7 @@ namespace RpgBot.Commands
                             gemBaseValue = gemValue.BaseValue;
                         }
 
-                        increaseDecreaseDieResult = rnd.Next(1, 11);
+                        increaseDecreaseDieResult = RandomNumberGenerator.GetInt32(1, 11);
 
                         if (increaseDecreaseDieResult == 2)
                         {
@@ -112,7 +112,7 @@ namespace RpgBot.Commands
                         }
                         else if (increaseDecreaseDieResult == 3)
                         {
-                            int increaseD6Result = rnd.Next(1, 7);
+                            int increaseD6Result = RandomNumberGenerator.GetInt32(1, 7);
                             double increasePercentage = (double)(increaseD6Result * 10) / 100;
 
                             double gemIncreaseValue = gemBaseValue * increasePercentage;
@@ -150,7 +150,7 @@ namespace RpgBot.Commands
                             gemBaseValue = gemValue.BaseValue;
                         }
 
-                        increaseDecreaseDieResult = rnd.Next(1, 11);
+                        increaseDecreaseDieResult = RandomNumberGenerator.GetInt32(1, 11);
 
                         if (increaseDecreaseDieResult == 1)
                         {
@@ -164,7 +164,7 @@ namespace RpgBot.Commands
                         }
                         else if (increaseDecreaseDieResult == 3)
                         {
-                            int increaseD6Result = rnd.Next(1, 7);
+                            int increaseD6Result = RandomNumberGenerator.GetInt32(1, 7);
                             double increasePercentage = (double)(increaseD6Result * 10) / 100;
 
                             double gemIncreaseValue = gemBaseValue * increasePercentage;
@@ -178,7 +178,7 @@ namespace RpgBot.Commands
                         }
                         else if (increaseDecreaseDieResult == 9)
                         {
-                            int decreaseD4Result = rnd.Next(1, 5);
+                            int decreaseD4Result = RandomNumberGenerator.GetInt32(1, 5);
                             double decreasePercentage = (double)(decreaseD4Result * 10) / 100;
 
                             double gemDecreaseValue = gemBaseValue * decreasePercentage;

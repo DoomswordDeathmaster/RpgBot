@@ -84,6 +84,7 @@ namespace RpgBot
             // load our data
             DataService dataService = new DataService();
 
+            dataService.LoadEmojis();
             dataService.LoadSpellText();
             dataService.LoadGemstoneData();
 
